@@ -17,6 +17,8 @@ function SetPerformanceInfo{
 		$metricName = "Percentage CPU,Available Memory Bytes,Disk Read Operations/Sec,Disk Write Operations/Sec,Network Out Total,Network In Total"
 		$vmMetric = Get-AzMetric -ResourceId $ids.rid -MetricName $metricName -EndTime $endTime -StartTime  $startTime -TimeGrain 0:30:00 -WarningAction SilentlyContinue -ErrorAction SilentlyContinue
 		
+		#TODO
+		
 		if(-not $vmMetric){
 			$vmPerfMetrics = [pscustomobject]@{
 				"MachineId"=$ids.vmID
