@@ -21,7 +21,8 @@ param (
   [switch]$no_perf=$false,
   [int]$threadLimit=30,
   [switch]$no_public_ip=$false,
-  [switch]$no_resources=$false
+  [switch]$no_resources=$false,
+  [string]$one_Subscription=""
 )
 <#
 	.DESCRIPTION
@@ -38,6 +39,9 @@ param (
 
 	.PARAMETER no_resources
 	Default False. Use to indicate whether resource collection is performed.
+
+	.PARAMETER one_Subscription
+	Default Empty. Select only one Subscription.
 
 	.EXAMPLE
     PS> ./azure-export -no_perf
@@ -387,6 +391,17 @@ $vmCount = 0
 $vmsscount = 0
 # Loop through all subscriptions user has access to
 foreach ($sub in $subList){
+	
+	if ( "" -ne $one_Subscription )
+	{
+		if ( $one_Subscription -ne $sub ) 
+		{
+			Write-Host "Skip Subscription $sub"
+			LogMessage "Skip Subscription $sub"
+			break
+		}
+	}
+	
 	LogMessage("Processing Subscription $sub.Name")
 
 	Select-AzSubscription -SubscriptionId $sub.Id
