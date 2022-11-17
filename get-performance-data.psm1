@@ -13,7 +13,7 @@ function SetPerformanceInfo{
 		$vmPerfObjectList = @()
 		$endTime = Get-Date
 		$startTime = $endTime.AddDays(-30)
-		#$endTime = "11/30/2022 4:37:00 PM"
+		#$endTime = "10/31/2022 4:37:00 PM"
 		#$startTime =  "10/30/2022 4:37:00 PM"
 		
 		$metricName = "Percentage CPU,Available Memory Bytes,Disk Read Operations/Sec,Disk Write Operations/Sec,Network Out Total,Network In Total"
