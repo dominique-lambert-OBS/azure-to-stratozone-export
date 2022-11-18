@@ -56,20 +56,21 @@ function SetPerformanceInfo{
 		$MyMetricCount=$vmMetric.Count
 		ModuleLogMessage "MyMetricCount : $MyMetricCount" $log
 		
-		$myCount0=$vmMetric[0].Data.Count
-		$myCount1=$vmMetric[1].Data.Count
-		$myCount2=$vmMetric[2].Data.Count
-		$myCount3=$vmMetric[3].Data.Count
-		$myCount4=$vmMetric[4].Data.Count
-		$myCount5=$vmMetric[5].Data.Count
-		ModuleLogMessage "myCount : $myCount0, $myCount1, $myCount2, $myCount3, $myCount4, $myCount5" $log	
-
 		$0CpuUtilizationPercentageIndex=5
 		$1AvailableMemoryBytesIndex=0
 		$2DiskReadOperationsPerSecIndex=1
 		$3DiskWriteOperationsPerSecIndex=2
 		$4NetworkBytesPerSecSentIndex=3
 		$5NetworkBytesPerSecReceivedIndex=4
+
+		$myCount0=$vmMetric[$0CpuUtilizationPercentageIndex].Data.Count
+		$myCount1=$vmMetric[$1AvailableMemoryBytesIndex].Data.Count
+		$myCount2=$vmMetric[$2DiskReadOperationsPerSecIndex].Data.Count
+		$myCount3=$vmMetric[$3DiskWriteOperationsPerSecIndex].Data.Count
+		$myCount4=$vmMetric[$4NetworkBytesPerSecSentIndex].Data.Count
+		$myCount5=$vmMetric[$5NetworkBytesPerSecReceivedIndex].Data.Count
+		ModuleLogMessage "myCount : $myCount0, $myCount1, $myCount2, $myCount3, $myCount4, $myCount5" $log	
+
 
 		if($vmMetric.Count -gt 0){
 			for($i =0;$i -lt $perfDataCount; $i++){
