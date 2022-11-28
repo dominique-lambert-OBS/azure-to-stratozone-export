@@ -1,5 +1,25 @@
 #Add performance data to the global array for specified VM
 
+function CheckMetricValue{
+	param
+	(
+		# VM 
+		[Parameter(Mandatory = $true)]
+		$metricValue
+	)
+		try{
+				if($metricValue -gt 0){
+					return $metricValue
+				}
+				return 0
+		}
+		catch{
+			ModuleLogMessage "Error - CheckMetricValue - $_.Exception.Message" $log
+			return 0
+		}
+}
+
+
 function SetPerformanceInfo{
 	param
 	(
@@ -17,11 +37,10 @@ function SetPerformanceInfo{
 		#$startTime =  "10/30/2022 4:37:00 PM"
 		
 		$metricName = "Percentage CPU,Available Memory Bytes,Disk Read Operations/Sec,Disk Write Operations/Sec,Network Out Total,Network In Total"
-		
-		$vmMetric = Get-AzMetric -ResourceId $ids.rid -MetricName $metricName -EndTime $endTime -StartTime  $startTime -TimeGrain 0:30:00 -WarningAction SilentlyContinue -ErrorAction SilentlyContinue | Sort-Object -Property @{Expression = "Name"; Descending = true}
-		#$vmMetric = Get-AzMetric -ResourceId $ids.rid -MetricName $metricName -EndTime $endTime -StartTime  $startTime -TimeGrain 0:30:00 -WarningAction SilentlyContinue -ErrorAction SilentlyContinue
-		
+		$vmMetric = Get-AzMetric -ResourceId $ids.rid -MetricName $metricName -EndTime $endTime -StartTime  $startTime -TimeGrain 0:30:00 -WarningAction SilentlyContinue -ErrorAction SilentlyContinue
 		ModuleLogMessage "Get-AzMetric -ResourceId $ids.rid -MetricName $metricName -EndTime $endTime -StartTime  $startTime -TimeGrain 0:30:00 -WarningAction SilentlyContinue -ErrorAction SilentlyContinue" $log
+
+		$metricNameList = $vmMetric.Name.Value
 
 		if(-not $vmMetric){
 			$vmPerfMetrics = [pscustomobject]@{
@@ -55,54 +74,47 @@ function SetPerformanceInfo{
 		$perfDataCount = $vmMetric[0].Data.Count
 		$MyMetricCount=$vmMetric.Count
 		ModuleLogMessage "MyMetricCount : $MyMetricCount" $log
-		
-		$0CpuUtilizationPercentageIndex=5
-		$1AvailableMemoryBytesIndex=0
-		$2DiskReadOperationsPerSecIndex=1
-		$3DiskWriteOperationsPerSecIndex=2
-		$4NetworkBytesPerSecSentIndex=3
-		$5NetworkBytesPerSecReceivedIndex=4
 
-		$myCount0=$vmMetric[$0CpuUtilizationPercentageIndex].Data.Count
-		$myCount1=$vmMetric[$1AvailableMemoryBytesIndex].Data.Count
-		$myCount2=$vmMetric[$2DiskReadOperationsPerSecIndex].Data.Count
-		$myCount3=$vmMetric[$3DiskWriteOperationsPerSecIndex].Data.Count
-		$myCount4=$vmMetric[$4NetworkBytesPerSecSentIndex].Data.Count
-		$myCount5=$vmMetric[$5NetworkBytesPerSecReceivedIndex].Data.Count
-		ModuleLogMessage "myCount : $myCount0, $myCount1, $myCount2, $myCount3, $myCount4, $myCount5" $log	
+		$CpuUtilizationPercentageIndex = [array]::IndexOf($metricNameList,"Percentage CPU")
+		$AvailableMemoryBytesIndex = [array]::IndexOf($metricNameList,"Available Memory Bytes")
+		$DiskReadOperationsPerSecIndex = [array]::IndexOf($metricNameList,"Disk Read Operations/Sec")
+		$DiskWriteOperationsPerSecIndex = [array]::IndexOf($metricNameList,"Disk Write Operations/Sec")
+		$NetworkBytesPerSecOutIndex = [array]::IndexOf($metricNameList,"Network Out Total")
+		$NetworkBytesPerSecInIndex = [array]::IndexOf($metricNameList,"Network In Total")
 
+		$CpuUtilizationPercentageCount=$vmMetric[$CpuUtilizationPercentageIndex].Data.Count
+		$AvailableMemoryBytesCount=$vmMetric[$AvailableMemoryBytesIndex].Data.Count
+		$DiskReadOperationsPerSecCount=$vmMetric[$DiskReadOperationsPerSecIndex].Data.Count
+		$DiskWriteOperationsPerSecCount=$vmMetric[$DiskWriteOperationsPerSecIndex].Data.Count
+		$NetworkBytesPerSecOutCount=$vmMetric[$NetworkBytesPerSecOutIndex].Data.Count
+		$NetworkBytesPerSecInCount=$vmMetric[$NetworkBytesPerSecInIndex].Data.Count
 
-		if($vmMetric.Count -gt 0){
+		ModuleLogMessage "MetricsCounts : $CpuUtilizationPercentageCount, $AvailableMemoryBytesCount, $DiskReadOperationsPerSecCount, $DiskWriteOperationsPerSecCount, $NetworkBytesPerSecOutCount, $NetworkBytesPerSecInCount" $log	
+
+		if($vmMetric.Count -gt 5){
 			for($i =0;$i -lt $perfDataCount; $i++){
 				try{
-					$meticValue0=0
-					if ($i -lt $myCount0) {$meticValue0=[math]::Round($vmMetric[$0CpuUtilizationPercentageIndex].Data[$i].Average,10)}
-					$meticValue1=0
-					if ($i -lt $myCount1) {$meticValue1=[math]::ceiling($vmMetric[$1AvailableMemoryBytesIndex].Data[$i].Average)}
-					$meticValue2=0
-					if ($i -lt $myCount2) {$meticValue2=[math]::Round(([decimal]$vmMetric[$2DiskReadOperationsPerSecIndex].Data[$i].Average),10)}
-					$meticValue3=0
-					if ($i -lt $myCount3) {$meticValue3=[math]::Round([decimal]$vmMetric[$3DiskWriteOperationsPerSecIndex].Data[$i].Average,10)}
-					$meticValue4=0
-					if ($i -lt $myCount4) {$meticValue4=CalculateNetworkDataPerSec([decimal]$vmMetric[$4NetworkBytesPerSecSentIndex].Data[$i].Total)}
-					$meticValue5=0
-					if ($i -lt $myCount5) {$meticValue5=CalculateNetworkDataPerSec([decimal]$vmMetric[$5NetworkBytesPerSecReceivedIndex].Data[$i].Total)}
-
+					$CpuUtilizationPercentageValue=0
+					if ($i -lt $CpuUtilizationPercentageCount) {$CpuUtilizationPercentageValue=[math]::Round($vmMetric[$CpuUtilizationPercentageIndex].Data[$i].Average,10)}
+					$AvailableMemoryBytesValue=0
+					if ($i -lt $AvailableMemoryBytesCount) {$AvailableMemoryBytesValue=CheckMetricValue([math]::ceiling($vmMetric[$AvailableMemoryBytesIndex].Data[$i].Average))}
+					$DiskReadOperationsPerSecValue=0
+					if ($i -lt $DiskReadOperationsPerSecCount) {$DiskReadOperationsPerSecValue=CheckMetricValue([math]::Round(([decimal]$vmMetric[$DiskReadOperationsPerSecIndex].Data[$i].Average),10))}
+					$DiskWriteOperationsPerSecValue=0
+					if ($i -lt $DiskWriteOperationsPerSecCount) {$DiskWriteOperationsPerSecValue=CheckMetricValue([math]::Round([decimal]$vmMetric[$DiskWriteOperationsPerSecIndex].Data[$i].Average,10))}
+					$NetworkBytesPerSecOutValue=0
+					if ($i -lt $NetworkBytesPerSecOutCount) {$NetworkBytesPerSecOutValue=CalculateNetworkDataPerSec([decimal]$vmMetric[$NetworkBytesPerSecOutIndex].Data[$i].Total)}
+					$NetworkBytesPerSecInValue=0
+					if ($i -lt $NetworkBytesPerSecInCount) {$NetworkBytesPerSecInValue=CalculateNetworkDataPerSec([decimal]$vmMetric[$NetworkBytesPerSecInIndex].Data[$i].Total)}
 					$vmPerfMetrics = [pscustomobject]@{
 						"MachineId"=$ids.vmID
 						"TimeStamp"=$vmMetric[0].Data[$i].TimeStamp
-						#"CpuUtilizationPercentage"=[math]::Round($vmMetric[0].Data[$i].Average,10)
-						"CpuUtilizationPercentage"=$meticValue0
-						#"AvailableMemoryBytes"=[math]::ceiling($vmMetric[1].Data[$i].Average)
-						"AvailableMemoryBytes"=$meticValue1
-						#"DiskReadOperationsPerSec"=[math]::Round(([decimal]$vmMetric[2].Data[$i].Average),10)
-						"DiskReadOperationsPerSec"=$meticValue2
-						#"DiskWriteOperationsPerSec"=[math]::Round([decimal]$vmMetric[3].Data[$i].Average,10)
-						"DiskWriteOperationsPerSec"=$meticValue3
-						#"NetworkBytesPerSecSent"=CalculateNetworkDataPerSec([decimal]$vmMetric[4].Data[$i].Total)
-						"NetworkBytesPerSecSent"=$meticValue4
-						#"NetworkBytesPerSecReceived"=CalculateNetworkDataPerSec([decimal]$vmMetric[5].Data[$i].Total)
-						"NetworkBytesPerSecReceived"=$meticValue5
+						"CpuUtilizationPercentage" = $CpuUtilizationPercentageValue
+						"AvailableMemoryBytes" = $AvailableMemoryBytesValue
+						"DiskReadOperationsPerSec" = $DiskReadOperationsPerSecValue
+						"DiskWriteOperationsPerSec" = $DiskWriteOperationsPerSecValue
+						"NetworkBytesPerSecSent " = $NetworkBytesPerSecOutValue
+						"NetworkBytesPerSecReceived" = $NetworkBytesPerSecInValue
 					}
 					$vmPerfObjectList += $vmPerfMetrics
 				}
@@ -122,7 +134,7 @@ function SetPerformanceInfo{
 # Divide the network data by the time period used in the query
 function CalculateNetworkDataPerSec($NetworkTotal){
 	try{
-		return [math]::Round($NetworkTotal /1800,10)
+		return [math]::Round((CheckMetricValue($NetworkTotal)) /1800,10)
 	}
 	catch{
 		return 0
