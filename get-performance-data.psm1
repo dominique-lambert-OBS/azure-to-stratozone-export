@@ -38,7 +38,9 @@ function SetPerformanceInfo{
 		
 		$metricName = "Percentage CPU,Available Memory Bytes,Disk Read Operations/Sec,Disk Write Operations/Sec,Network Out Total,Network In Total"
 		$vmMetric = Get-AzMetric -ResourceId $ids.rid -MetricName $metricName -EndTime $endTime -StartTime  $startTime -TimeGrain 0:30:00 -WarningAction SilentlyContinue -ErrorAction SilentlyContinue
-		ModuleLogMessage "Get-AzMetric -ResourceId $ids.rid -MetricName $metricName -EndTime $endTime -StartTime  $startTime -TimeGrain 0:30:00 -WarningAction SilentlyContinue -ErrorAction SilentlyContinue" $log
+
+		$myRid=$ids.rid
+        ModuleLogMessage "Get-AzMetric -ResourceId ""$myRid"" -MetricName ""$metricName"" -EndTime ""$endTime"" -StartTime  ""$startTime"" -TimeGrain ""0:30:00"" -WarningAction SilentlyContinue -ErrorAction SilentlyContinue" $log
 
 		$metricNameList = $vmMetric.Name.Value
 
