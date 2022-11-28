@@ -57,20 +57,6 @@ function SetPerformanceInfo{
 			return $vmPerfObjectList
 		}
 		
-		$MyMetricName0=$vmMetric[0].Name.Value
-		$MyMetricName1=$vmMetric[1].Name.Value
-		$MyMetricName2=$vmMetric[2].Name.Value
-		$MyMetricName3=$vmMetric[3].Name.Value
-		$MyMetricName4=$vmMetric[4].Name.Value
-		$MyMetricName5=$vmMetric[5].Name.Value
-		
-		ModuleLogMessage "[0] Name.value : $MyMetricName0" $log
-		ModuleLogMessage "[1] Name.value : $MyMetricName1" $log
-		ModuleLogMessage "[2] Name.value : $MyMetricName2" $log
-		ModuleLogMessage "[3] Name.value : $MyMetricName3" $log
-		ModuleLogMessage "[4] Name.value : $MyMetricName4" $log
-		ModuleLogMessage "[5] Name.value : $MyMetricName5" $log
-
 		$perfDataCount = $vmMetric[0].Data.Count
 		$MyMetricCount=$vmMetric.Count
 		ModuleLogMessage "MyMetricCount : $MyMetricCount" $log
@@ -88,6 +74,20 @@ function SetPerformanceInfo{
 		$DiskWriteOperationsPerSecCount=$vmMetric[$DiskWriteOperationsPerSecIndex].Data.Count
 		$NetworkBytesPerSecOutCount=$vmMetric[$NetworkBytesPerSecOutIndex].Data.Count
 		$NetworkBytesPerSecInCount=$vmMetric[$NetworkBytesPerSecInIndex].Data.Count
+
+		$MyMetricName0=$vmMetric[$CpuUtilizationPercentageIndex].Name.Value
+		$MyMetricName1=$vmMetric[$AvailableMemoryBytesIndex].Name.Value
+		$MyMetricName2=$vmMetric[$DiskReadOperationsPerSecIndex].Name.Value
+		$MyMetricName3=$vmMetric[$DiskWriteOperationsPerSecIndex].Name.Value
+		$MyMetricName4=$vmMetric[$NetworkBytesPerSecOutIndex].Name.Value
+		$MyMetricName5=$vmMetric[$NetworkBytesPerSecInIndex].Name.Value
+		
+		ModuleLogMessage "[0] Name.value : $MyMetricName0" $log
+		ModuleLogMessage "[1] Name.value : $MyMetricName1" $log
+		ModuleLogMessage "[2] Name.value : $MyMetricName2" $log
+		ModuleLogMessage "[3] Name.value : $MyMetricName3" $log
+		ModuleLogMessage "[4] Name.value : $MyMetricName4" $log
+		ModuleLogMessage "[5] Name.value : $MyMetricName5" $log
 
 		ModuleLogMessage "MetricsCounts : $CpuUtilizationPercentageCount, $AvailableMemoryBytesCount, $DiskReadOperationsPerSecCount, $DiskWriteOperationsPerSecCount, $NetworkBytesPerSecOutCount, $NetworkBytesPerSecInCount" $log	
 
